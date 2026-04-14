@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>号码抽签控制版</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 320px; text-align: center; }
+        h2 { color: #333; margin-bottom: 20px; }
+        #display { font-size: 64px; font-weight: bold; color: #4a90e2; margin: 30px 0; height: 80px; line-height: 80px; }
+        .btn { background: #4a90e2; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn:hover { background: #357abd; transform: translateY(-2px); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .info { margin-top: 20px; font-size: 14px; color: #888; }
+        #history { margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 14px; color: #555; min-height: 40px;}
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>幸运号码抽签</h2>
+    <div id="display">1-31</div>
+    <button class="btn" id="drawBtn" onclick="startDraw()">开始抽签</button>
+    
+    <div class="info">范围：1 号 至 31 号</div>
+    <div id="history">中奖记录：等待抽取</div>
+</div>
+
+<script>
+    // 预设的结果序列
+    const secretResults = ["6号", "12号"];
+    let drawCount = 0;
+    let isRolling = false;
+
+    function startDraw() {
+        if (isRolling) return;
+        
+        // 检查是否已经抽完了预设的两个号
+        if (drawCount >= secretResults.length) {
+            alert("抽签已结束，限定名额已用完。");
+            return;
+        }
+
+        const display = document.getElementById('display');
+        const btn = document.getElementById('drawBtn');
+        const historyDiv = document.getElementById('history');
+        
+        isRolling = true;
+        btn.disabled = true;
+        
+        // 1. 模拟随机滚动的视觉效果
+        let timer = setInterval(() => {
+            const randomNum = Math.floor(Math.random() * 31) + 1;
+            display.innerText = randomNum + "号";
+        }, 50);
+
+        // 2. 1.5秒后停止，并显示“限定”好的号码
+        setTimeout(() => {
+            clearInterval(timer);
+            
+            // 核心逻辑：按顺序取出 6号 和 12号
+            const finalResult = secretResults[drawCount];
+            display.innerText = finalResult;
+            display.style.color = "#e74c3c"; // 中奖变红
+
+            // 更新历史记录
+            if (drawCount === 0) historyDiv.innerHTML = "中奖记录：<br>";
+            historyDiv.innerHTML += `第 ${drawCount + 1} 次：<strong>${finalResult}</strong><br>`;
+
+            drawCount++;
+            isRolling = false;
+            btn.disabled = false;
+            
+            // 抽完后按钮变色提示
+            if (drawCount >= secretResults.length) {
+                btn.innerText = "抽取完毕";
+                btn.style.background = "#999";
+            }
+        }, 1500);
+    }
+</script>
+
+</body>
+</html>
