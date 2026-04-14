@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>号码抽签高级版</title>
+    <style>
+        body { font-family: 'Microsoft YaHei', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+        h2 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 14px; margin-bottom: 20px; }
+        #display { font-size: 64px; font-weight: bold; color: #4a90e2; margin: 30px 0; height: 80px; line-height: 80px; }
+        .btn { background: #4a90e2; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 18px; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn:hover { background: #357abd; transform: translateY(-2px); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        #history { margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; font-size: 14px; color: #555; text-align: left; line-height: 1.6; }
+        .highlight { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>幸运号码抽签</h2>
+    <div class="subtitle">范围：1 - 31 号</div>
+    <div id="display">准备</div>
+    <button class="btn" id="drawBtn" onclick="startDraw()">开始抽签</button>
+    
+    <div id="history">中奖记录：<br>等待抽取...</div>
+</div>
+
+<script>
+    // 初始化 1-31 的号码池
+    let pool = Array.from({length: 31}, (_, i) => (i + 1) + "号");
+    let drawCount = 0;
+    let isRolling = false;
+    let winners = [];
+
+    function startDraw() {
+        if (isRolling) return;
+        
+        // 限制只抽 3 次
+        if (drawCount >= 3) {
+            alert("抽签次数已达上限。");
+            return;
+        }
+
+        const display = document.getElementById('display');
+        const btn = document.getElementById('drawBtn');
+        const historyDiv = document.getElementById('history');
+        
+        isRolling = true;
+        btn.disabled = true;
+        display.style.color = "#4a90e2";
+
+        // 1. 模拟随机滚动的视觉效果
+        let timer = setInterval(() => {
+            const randomTmp = Math.floor(Math.random() * 31) + 1;
+            display.innerText = randomTmp + "号";
+        }, 50);
+
+        // 2. 1.2秒后根据当前次数决定结果
+        setTimeout(() => {
+            clearInterval(timer);
+            
+            let finalResult;
+
+            if (drawCount === 0) {
+                // 【第一次】：内定 6 号
+                finalResult = "6号";
+            } 
+            else if (drawCount === 1) {
+                // 【第二次】：真正随机抽取（排除掉 6 号）
+                let tempPool = pool.filter(n => n !== "6号" && n !== "12号"); // 排除掉内定的号增加真实感
+                const randomIndex = Math.floor(Math.random() * tempPool.length);
+                finalResult = tempPool[randomIndex];
+            } 
+            else if (drawCount === 2) {
+                // 【第三次】：内定 12 号
+                finalResult = "12号";
+            }
+
+            // 更新展示
+            display.innerText = finalResult;
+            display.style.color = "#e74c3c";
+
+            // 记录结果并更新页面
+            winners.push(finalResult);
+            if (drawCount === 0) historyDiv.innerHTML = "中奖记录：<br>";
+            historyDiv.innerHTML += `第 ${drawCount + 1} 次：<span class="highlight">${finalResult}</span><br>`;
+
+            drawCount++;
+            isRolling = false;
+            
+            if (drawCount < 3) {
+                btn.disabled = false;
+                btn.innerText = "继续抽取";
+            } else {
+                btn.innerText = "抽取完毕";
+                btn.style.background = "#999";
+            }
+        }, 1200);
+    }
+</script>
+
+</body>
+</html>
